@@ -33,7 +33,9 @@ For additional information please check http://www.stemi.education.
 
 */
 
+
 #include "ServoDriver.h"
+
 
 ServoDriver::ServoDriver()
 {
@@ -44,20 +46,20 @@ ServoDriver::ServoDriver()
 
 void ServoDriver::servoPower(bool power)
 {
-	pinMode(SERVO_POWER_PIN, OUTPUT);	  // Servo power enable
-	digitalWrite(SERVO_POWER_PIN, power); // LOW for disable, HIGH for enable
+	pinMode(SERVO_POWER_PIN, OUTPUT); //Servo power enable
+	digitalWrite(SERVO_POWER_PIN, power); //LOW for disable, HIGH for enable
 }
 
 int ServoDriver::servoWrite()
 {
 	servoPower(robot.servoCtrl.power);
-
-	// SERVO MODES
+	
+	//SERVO MODES
 	float calibratedServos[18];
 	switch (robot.servoCtrl.mode)
 	{
 	case SERVO_CALIBRATION_MODE:
-
+		
 		for (int i = 0; i < 6; i++)
 		{
 			calibratedServos[i * 3] = 0 + robot.servoCtrl.calibrationOffsetBytes[i * 3] / 100.0 * 0.2;
@@ -66,17 +68,16 @@ int ServoDriver::servoWrite()
 		}
 		sc.moveAllServos(calibratedServos);
 
-		if (robot.servoCtrl.nudge > -1) // if nudge is required for some servo layer
+		if (robot.servoCtrl.nudge > -1) //if nudge is required for some servo layer
 		{
 			int delayTime = 10;
-			// Serial.println(calibrationServoLayerSelected);
-			float nudgeAmmount = 0.1; // radians
+			//Serial.println(calibrationServoLayerSelected);
+			float nudgeAmmount = 0.1; //radians
 			for (int j = 0; j < 20; j++)
 			{
 				for (int i = 0; i < 18; i++)
 				{
-					if (i % 3 == robot.servoCtrl.nudge)
-						calibratedServos[i] += nudgeAmmount / delayTime;
+					if (i % 3 == robot.servoCtrl.nudge) calibratedServos[i] += nudgeAmmount / delayTime;
 				}
 				sc.moveAllServos(calibratedServos);
 				delay(delayTime);
@@ -85,8 +86,7 @@ int ServoDriver::servoWrite()
 			{
 				for (int i = 0; i < 18; i++)
 				{
-					if (i % 3 == robot.servoCtrl.nudge)
-						calibratedServos[i] -= nudgeAmmount / delayTime;
+					if (i % 3 == robot.servoCtrl.nudge) calibratedServos[i] -= nudgeAmmount / delayTime;
 				}
 				sc.moveAllServos(calibratedServos);
 				delay(delayTime);
@@ -95,8 +95,7 @@ int ServoDriver::servoWrite()
 			{
 				for (int i = 0; i < 18; i++)
 				{
-					if (i % 3 == robot.servoCtrl.nudge)
-						calibratedServos[i] += nudgeAmmount / delayTime;
+					if (i % 3 == robot.servoCtrl.nudge) calibratedServos[i] += nudgeAmmount / delayTime;
 				}
 				sc.moveAllServos(calibratedServos);
 				delay(delayTime);
@@ -105,7 +104,7 @@ int ServoDriver::servoWrite()
 		}
 		break;
 	case SERVO_WALKING_MODE:
-		// add calibration data:
+		//add calibration data:
 		for (int i = 0; i < 18; i++)
 		{
 			calibratedServos[i] = robot.servoCtrl.servoAngles[i] + robot.servoCtrl.calibrationOffsetBytes[i] / 100.0 * 0.2;
@@ -155,26 +154,4 @@ void ServoDriver::loadCalibrationData()
 		}
 		Serial.println();
 	}
-}
-
-void setMuxChannel(int channel)
-{
-	digitalWrite(PIN_A, bitRead(channel, 0));
-	digitalWrite(PIN_B, bitRead(channel, 1));
-	digitalWrite(PIN_C, bitRead(channel, 2));
-}
-
-void ServoDriver::analyseServo()
-{
-	// TODO
-	return;
-	for (int i = 0; i < 7; i++)
-	{
-		setMuxChannel(i);
-		Serial.print((float)((float)analogRead(PIN_AD) / 4095.0) / 3.3 * 0.1 * 50 * 1000);
-		Serial.print(" ");
-	}
-	setMuxChannel(7);
-	float voltage = (float)((float)analogRead(35) / 4095.0) * 3.3 * 2;
-	Serial.println(voltage);
 }

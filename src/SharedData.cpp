@@ -35,13 +35,10 @@ For additional information please check http://www.stemi.education.
 
 
 #include "SharedData.h"
-#include "Server.h"
-#include <WiFi.h>
-#include <esp_wifi.h>
 
 SharedData:: SharedData()
 {
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	moveCtrl.linearVelocity = 0;
 	moveCtrl.direction = PI / 2;
@@ -74,6 +71,7 @@ SharedData:: SharedData()
 	danceInputData.ledSpreadRatio = 100;
 	danceInputData.poseSpeed = 80;
 	danceInputData.moveDuration = -1;
+
 }
 
 void SharedData::writeServoAngles(float servoAnglesNew[18])
@@ -128,16 +126,16 @@ void SharedData::useLedInputData(InputData *data)
 		data->ledDiretion * PI / 180 + PI / 2);
 	_setLedRotationSpeed(data->ledRotationSpeed / 100.0 * 10);
 	_setLedBlinkingSpeed(data->ledBlinkingSpeed / 100.0 * 10);
-	if (!robot.isSerialConnectionOn) {
-		ledCtrl.mode = data->ledMode;
-		for (int i = 0; i < LED_COUNT; i++)
+	ledCtrl.mode = data->ledMode;
+	for (int i = 0; i < LED_COUNT; i++)
+	{
+		for (int j = 0; j < 3; j++)
 		{
-			for (int j = 0; j < 3; j++)
-			{
-				ledCtrl.manualClr[i][j] = data->ledManualClr[i][j];
-			}
+			ledCtrl.manualClr[i][j] = data->ledManualClr[i][j];
 		}
 	}
+
+
 }
 
 //seting user data [public]
@@ -148,7 +146,6 @@ void SharedData::setLedStatic(uint8_t ledNo, Color color)
 	userInputData.ledManualClr[ledNo][1] = color.g;
 	userInputData.ledManualClr[ledNo][2] = color.b;
 }
-
 void SharedData::setLedStatic(Color color)
 {
 	userInputData.ledMode = LED_MANUAL_MODE;
@@ -244,6 +241,8 @@ void SharedData::move(userPresetInputData movement, float duration)
 	userInputData.linearVelocity = saturate(movement.linearVelocity,0,100);
 	userInputData.direction = movement.direction;
 	userInputData.moveDuration = duration;
+
+
 }
 
 void SharedData::_move(float linearVelocity, float direction, float angularVelocity, float duration)
@@ -413,18 +412,13 @@ void SharedData::exitUserMode()
 
 void SharedData::loadName()
 {
-	// Preferences error on some ESP32 devices
-	uint8_t mac[6];
-	esp_efuse_mac_get_default(mac);
-	name = names.generateName(names.sumStringMemberValues1(mac), names.sumStringMemberValues2(mac));
-	Serial.printf("Name not stored, storing \"%s\"\n",name.c_str());
-	return;
 	names.storeInit();
 	names.load(&robot.name);
+	uint8_t mac[6];
 	if (name == "\0")
 	{
 		esp_efuse_mac_get_default(mac);
-		name = names.generateName(names.sumStringMemberValues1(mac), names.sumStringMemberValues2(mac));
+		name = names.generateName(names.sumStringMemberValues(mac));
 		Serial.printf("Name not stored, storing \"%s\"\n",name.c_str());
 		storeName(name);
 	}
@@ -432,13 +426,6 @@ void SharedData::loadName()
 
 void SharedData::storeName(std::string nameNew)
 {
-	names.storeInit();
 	names.store(nameNew);
-}
-
-void SharedData::startAction(std::string actionName)
-{
-	if (actionName == "ota") {
-		startOtaServer();
-	}
+	name = nameNew;
 }

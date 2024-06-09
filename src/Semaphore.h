@@ -1,2 +1,0 @@
-void takeSemaphore();
-void giveSemaphore();

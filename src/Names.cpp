@@ -41,25 +41,17 @@ Names::Names()
 
 }
 
-std::string Names::generateName(uint16_t number1, uint16_t number2)
+std::string Names::generateName(uint16_t number)
 {
-	return adjectives[number2%NUMBER_OF_ADJECTIVES] + " " + names[number1%NUMBER_OF_NAMES];
+
+
+	return names[number%NUMBER_OF_NAMES];
 }
 
-uint16_t Names::sumStringMemberValues1(uint8_t str[6])
+uint16_t Names::sumStringMemberValues(uint8_t str[6])
 {
 	uint16_t sum = 0;
 	for (unsigned i = 0; i<6; ++i)
-	{
-		sum += str[i];
-	}
-	return sum;
-}
-
-uint16_t Names::sumStringMemberValues2(uint8_t str[6])
-{
-	uint16_t sum = 0;
-	for (unsigned i = 0; i < 3; ++i)
 	{
 		sum += str[i];
 	}

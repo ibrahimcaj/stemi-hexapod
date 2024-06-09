@@ -88,19 +88,19 @@ void RobotEngine::checkState()
 			robot.setMode(ROBOT_DANCE_MODE);
 			break;
 		case TOUCH_00X:
-			if (!robot.BTConnectedCount && !robot.isSerialConnectionOn)
+			if (!robot.BTConnectedCount)
 				robot._move(3, PI / 2, 0, 2000);
 			break;
 		case TOUCH_X00:
-			if (!robot.BTConnectedCount && !robot.isSerialConnectionOn)
+			if (!robot.BTConnectedCount)
 				robot._move(3, -PI / 2, 0, 2000);
 			break;
 		case TOUCH_0XX:
-			if (!robot.BTConnectedCount && !robot.isSerialConnectionOn)
+			if (!robot.BTConnectedCount)
 				robot._writeExtraServo(-80);
 			break;
 		case TOUCH_XX0:
-			if (!robot.BTConnectedCount && !robot.isSerialConnectionOn)
+			if (!robot.BTConnectedCount)
 				robot._writeExtraServo(80);
 			break;
 		}
@@ -185,11 +185,9 @@ void RobotEngine::modesGO()
 	switch (robotMode)
 	{
 	case ROBOT_STANDBY_MODE:
-		if (robot.BTConnectedCount || robot.isSerialConnectionOn)
+		if (robot.BTConnectedCount)
 		{
-			if (robot.ledCtrl.mode != LED_MANUAL_MODE) {
-				robot.useLedInputData(&robot.btInputData);
-			}
+			robot.useLedInputData(&robot.btInputData);
 		}
 		else
 		{
@@ -203,12 +201,10 @@ void RobotEngine::modesGO()
 
 	case ROBOT_WALK_MODE:
 		//set up walking parameters
-		if (robot.BTConnectedCount || robot.isSerialConnectionOn)
+		if (robot.BTConnectedCount)
 		{
 			robot.useMoveInputData(&robot.btInputData);
-			if (robot.ledCtrl.mode != LED_MANUAL_MODE) {
-				robot.useLedInputData(&robot.btInputData);
-			}
+			robot.useLedInputData(&robot.btInputData);
 			robot._writeExtraServo(robot.universalData[0]);
 		}
 		else
@@ -260,8 +256,6 @@ void RobotEngine::modesGO()
 
 void RobotEngine::calibrateBattery(uint8_t touchID, int8_t exitMode)
 {
-	// Calibration removed
-	return;
 #ifdef DEBUG
 	Serial.print("t: ");
 	Serial.print(touchID);
